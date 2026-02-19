@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClinicFlow</title>
+
+  <!-- Performance Optimizations for Images -->
+  <link rel="preconnect" href="https://files.catbox.moe" crossorigin />
+  <link rel="dns-prefetch" href="https://files.catbox.moe" />
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+  <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+  <!-- Preload Critical Images (Above the Fold & Next Section) -->
+  <link rel="preload" as="image" href="https://files.catbox.moe/67wq66.png" fetchpriority="high" />
+  <link rel="preload" as="image" href="https://files.catbox.moe/1x5x5h.png" />
+  <link rel="preload" as="image" href="https://files.catbox.moe/hsg7jf.png" />
+  <link rel="preload" as="image" href="https://files.catbox.moe/oupf1j.png" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@400;700;900&family=Playfair+Display:wght@700;900&family=Outfit:wght@400;700;900&family=EB+Garamond:ital,wght@0,700;0,800;1,700&family=JetBrains+Mono:wght@700&family=Montserrat:wght@700;900&family=Lora:ital,wght@0,500;1,500&family=DM+Sans:wght@700;900&family=Nunito:wght@700;900&display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+            display: ['Poppins', 'sans-serif'],
+            modern: ['Inter', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+            elegant: ['EB Garamond', 'serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            montserrat: ['Montserrat', 'sans-serif'],
+            lora: ['Lora', 'serif'],
+            dmsans: ['DM Sans', 'sans-serif'],
+            nunito: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              purple: '#6366f1', // Indigo-500
+              dark: '#020617',   // Slate-950
+              gray: '#1e293b',   // Slate-800
+            }
+          },
+          backgroundImage: {
+            'noise': "url('https://grainy-gradients.vercel.app/noise.svg')",
+            'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
+          },
+          animation: {
+            'shine': 'shine 8s ease-in-out infinite',
+            'bounce-slow': 'bounce 3s infinite',
+          },
+          keyframes: {
+            shine: {
+              '0%, 100%': { backgroundPosition: '200% center' },
+              '50%': { backgroundPosition: '0% center' },
+            }
+          },
+          boxShadow: {
+            'bouncier': '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+            'button': '0 4px 0 0', // "Chunky" button shadow
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #1e293b;
+      overflow-x: hidden;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Hide scrollbar for clean look in some sections */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react/": "https://esm.sh/react@18.3.1/",
+    "lucide-react": "https://esm.sh/lucide-react@0.344.0",
+    "@google/genai": "https://esm.sh/@google/genai@^1.39.0",
+    "framer-motion": "https://esm.sh/framer-motion@11.0.8",
+    "react-dom": "https://esm.sh/react-dom@18.3.1",
+    "react-dom/": "https://esm.sh/react-dom@18.3.1/",
+    "clsx": "https://esm.sh/clsx@^2.1.0",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@^2.2.1",
+    "react-router-dom": "https://esm.sh/react-router-dom@^6.22.3"
+  }
+}
+</script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
+</html>

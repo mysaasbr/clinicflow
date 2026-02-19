@@ -1,0 +1,8 @@
+﻿[96msrc/pages/Dashboard/DomainSelection.tsx[0m:[93m160[0m:[93m38[0m - [91merror[0m[90m TS2304: [0mCannot find name 'Target'.
+
+[7m160[0m                                     <Target className="w-4 h-4 text-purple-500" /> SEO Premium
+[7m   [0m [91m                                     ~~~~~~[0m
+
+
+Found 1 error in src/pages/Dashboard/DomainSelection.tsx[90m:160[0m
+

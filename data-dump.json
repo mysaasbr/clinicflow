@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": "090ebb4c-1de4-4f61-883b-d45ae68edc5f",
+      "email": "admin@clinicflow.com",
+      "role": "admin"
+    },
+    {
+      "id": "365f3bea-0ae7-4084-af88-9e60e15661a7",
+      "email": "devffelix@gmail.com",
+      "role": "user"
+    }
+  ],
+  "clinics": [
+    {
+      "id": "81748b3e-5b3c-4508-bbee-bb74304a00fe",
+      "name": "Clinicflow",
+      "userId": "365f3bea-0ae7-4084-af88-9e60e15661a7"
+    },
+    {
+      "id": "ef883cfa-6b89-4f64-8f53-9141d7829b9f",
+      "name": "Test Clinic",
+      "userId": "090ebb4c-1de4-4f61-883b-d45ae68edc5f"
+    }
+  ],
+  "projects": [
+    {
+      "id": "8dd58fbe-3b66-458b-90a4-d56574abd587",
+      "clinicId": "ef883cfa-6b89-4f64-8f53-9141d7829b9f",
+      "status": "in_progress"
+    }
+  ]
+}

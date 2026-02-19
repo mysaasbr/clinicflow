@@ -1,0 +1,21 @@
+﻿[96msrc/pages/Dashboard/ContentGrid.tsx[0m:[93m100[0m:[93m30[0m - [91merror[0m[90m TS2304: [0mCannot find name 'ImageIcon'.
+
+[7m100[0m                             <ImageIcon className="w-3.5 h-3.5 text-indigo-400" />
+[7m   [0m [91m                             ~~~~~~~~~[0m
+
+[96msrc/pages/Dashboard/ContentGrid.tsx[0m:[93m151[0m:[93m50[0m - [91merror[0m[90m TS2304: [0mCannot find name 'ChevronRight'.
+
+[7m151[0m                                                 <ChevronRight className="w-5 h-5" />
+[7m   [0m [91m                                                 ~~~~~~~~~~~~[0m
+
+[96msrc/pages/Dashboard/DomainSelection.tsx[0m:[93m160[0m:[93m38[0m - [91merror[0m[90m TS2304: [0mCannot find name 'Target'.
+
+[7m160[0m                                     <Target className="w-4 h-4 text-purple-500" /> SEO Premium
+[7m   [0m [91m                                     ~~~~~~[0m
+
+
+Found 3 errors in 2 files.
+
+Errors  Files
+     2  src/pages/Dashboard/ContentGrid.tsx[90m:100[0m
+     1  src/pages/Dashboard/DomainSelection.tsx[90m:160[0m
