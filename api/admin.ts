@@ -33,7 +33,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const pathname = url.pathname;
 
-    const parts = pathname.split('/').filter(Boolean); // [api, admin, clients]
+    console.log(`[Admin Router] Request: ${req.method} ${pathname}`);
+
+    const parts = pathname.split('/').filter(Boolean);
     if (parts[0] !== 'api') {
         res.statusCode = 404;
         res.end(JSON.stringify({ error: 'Not found' }));
@@ -41,18 +43,30 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     const handlerPath = parts.slice(1).join('/');
-    const handlerFunc = handlers[handlerPath];
+    const exportedMember = handlers[handlerPath];
 
-    if (handlerFunc) {
+    if (exportedMember) {
         try {
+            // Robustly handle both default and direct function exports
+            const handlerFunc = exportedMember.default || exportedMember;
+
+            if (typeof handlerFunc !== 'function') {
+                throw new Error(`Handler for ${handlerPath} is not a function`);
+            }
+
             return await handlerFunc(req, res);
         } catch (error: any) {
-            console.error(`Error executing handler for ${pathname}:`, error);
+            console.error(`[Admin Router] Error executing ${pathname}:`, error);
             res.statusCode = 500;
-            res.end(JSON.stringify({ error: 'Internal Server Error', details: error.message }));
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({
+                error: 'Internal Server Error',
+                message: error.message,
+                path: pathname
+            }));
         }
     } else {
-        console.warn(`Handler not found for ${pathname}`);
+        console.warn(`[Admin Router] Handler not found for ${pathname}`);
         res.statusCode = 404;
         res.end(JSON.stringify({ error: `Handler not found for ${pathname}` }));
     }
