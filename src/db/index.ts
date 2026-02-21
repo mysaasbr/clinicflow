@@ -2,7 +2,6 @@ import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from './schema';
 
-// We make DB a getter to avoid top-level crashes if env var is missing during build/init
 let _db: any = null;
 
 export function getDb() {
@@ -11,14 +10,22 @@ export function getDb() {
         if (!url) {
             throw new Error('DATABASE_URL is not defined in environment variables');
         }
-        const sql = neon(url);
+        // Clean URL just in case (remove quotes if present)
+        const cleanUrl = url.trim().replace(/^["']|["']$/g, '');
+        const sql = neon(cleanUrl);
         _db = drizzle(sql, { schema });
     }
     return _db;
 }
 
-export const db = new Proxy({} as any, {
-    get: (target, prop) => {
-        return getDb()[prop];
-    }
-});
+// We still export 'db' as a getter-only object for convenience, 
+// but handlers should ideally use getDb() directly if they want to be safe.
+export const db = {
+    get select() { return getDb().select },
+    get insert() { return getDb().insert },
+    get update() { return getDb().update },
+    get delete() { return getDb().delete },
+    get query() { return getDb().query },
+    get execute() { return getDb().execute },
+    get transaction() { return getDb().transaction },
+};

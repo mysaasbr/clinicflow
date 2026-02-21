@@ -11,6 +11,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     try {
+        const { getDb } = await import('../../../src/db');
+        const db = getDb();
+
         const buffers = [];
         for await (const chunk of req) buffers.push(chunk);
         const { name, email, password } = JSON.parse(Buffer.concat(buffers).toString());

@@ -1,6 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
-// App Handlers (Static imports for Vercel bundling)
+console.log('[App Router] Module Initialized');
+
+// Static imports
 import changesCheckStatus from './_handlers/changes/check-status';
 import changesCreate from './_handlers/changes/create';
 import onboardingComplete from './_handlers/onboarding/complete-onboarding';
@@ -34,36 +36,34 @@ const handlers: Record<string, any> = {
 };
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
+    console.log(`[App Router] Invoked: ${req.method} ${req.url}`);
     try {
         const host = req.headers.host || 'localhost';
         const url = new URL(req.url || '/', `http://${host}`);
         const pathname = url.pathname;
 
-        console.log(`[App Router] Request: ${req.method} ${pathname}`);
-
         const parts = pathname.split('/').filter(Boolean);
         if (parts[0] !== 'api') {
             res.statusCode = 404;
-            res.end(JSON.stringify({ error: 'Not found' }));
+            res.end(JSON.stringify({ error: 'Not an API path' }));
             return;
         }
 
         const handlerPath = parts.slice(1).join('/');
-        const exportedMember = handlers[handlerPath];
+        const handler = handlers[handlerPath];
 
-        if (exportedMember) {
-            const func = exportedMember.default || exportedMember;
+        if (handler) {
+            const func = handler.default || handler;
             if (typeof func === 'function') {
                 return await func(req, res);
             }
             throw new Error(`Handler for ${handlerPath} is not a function`);
         } else {
-            console.warn(`[App Router] Path not found: ${handlerPath}`);
             res.statusCode = 404;
-            res.end(JSON.stringify({ error: `Path not found: ${handlerPath}` }));
+            res.end(JSON.stringify({ error: `Handler not found for: ${handlerPath}` }));
         }
     } catch (error: any) {
-        console.error(`[App Router] Runtime Error:`, error);
+        console.error(`[App Router] Fatal Error:`, error);
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({
