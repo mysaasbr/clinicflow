@@ -1,13 +1,37 @@
-
 import type { IncomingMessage, ServerResponse } from 'http';
-import path from 'path';
+
+// Admin Handlers
+import adminAddPayment from './_handlers/admin/add-payment';
+import adminChangesList from './_handlers/admin/changes/list';
+import adminChangesUpdateStatus from './_handlers/admin/changes/update-status';
+import adminClientDetails from './_handlers/admin/client-details';
+import adminClients from './_handlers/admin/clients';
+import adminCreateManualClient from './_handlers/admin/create-manual-client';
+import adminGetSettings from './_handlers/admin/get-settings';
+import adminLiberateAccess from './_handlers/admin/liberate-access';
+import adminStats from './_handlers/admin/stats';
+import adminSubscriptions from './_handlers/admin/subscriptions';
+import adminUpdateClientFee from './_handlers/admin/update-client-fee';
+import dashboardOverview from './_handlers/dashboard/overview';
+
+const handlers: Record<string, any> = {
+    'admin/add-payment': adminAddPayment,
+    'admin/changes/list': adminChangesList,
+    'admin/changes/update-status': adminChangesUpdateStatus,
+    'admin/client-details': adminClientDetails,
+    'admin/clients': adminClients,
+    'admin/create-manual-client': adminCreateManualClient,
+    'admin/get-settings': adminGetSettings,
+    'admin/liberate-access': adminLiberateAccess,
+    'admin/stats': adminStats,
+    'admin/subscriptions': adminSubscriptions,
+    'admin/update-client-fee': adminUpdateClientFee,
+    'dashboard/overview': dashboardOverview,
+};
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
     const url = new URL(req.url || '', `http://${req.headers.host}`);
     const pathname = url.pathname;
-
-    // Path looks like /api/admin/clients or /api/dashboard/overview
-    // We want to map it to ./_handlers/admin/clients.ts or ./_handlers/dashboard/overview.ts
 
     const parts = pathname.split('/').filter(Boolean); // [api, admin, clients]
     if (parts[0] !== 'api') {
@@ -16,16 +40,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         return;
     }
 
-    // Reconstruction of the relative path to the handler
-    // e.g. /api/admin/clients -> _handlers/admin/clients.ts
-    const handlerPath = parts.slice(1).join('/'); // admin/clients
+    const handlerPath = parts.slice(1).join('/');
+    const handlerFunc = handlers[handlerPath];
 
-    try {
-        const modulePath = `./_handlers/${handlerPath}.ts`;
-        const { default: handler } = await import(modulePath);
-        return await handler(req, res);
-    } catch (error: any) {
-        console.error(`Error loading handler for ${pathname}:`, error);
+    if (handlerFunc) {
+        try {
+            return await handlerFunc(req, res);
+        } catch (error: any) {
+            console.error(`Error executing handler for ${pathname}:`, error);
+            res.statusCode = 500;
+            res.end(JSON.stringify({ error: 'Internal Server Error', details: error.message }));
+        }
+    } else {
+        console.warn(`Handler not found for ${pathname}`);
         res.statusCode = 404;
         res.end(JSON.stringify({ error: `Handler not found for ${pathname}` }));
     }

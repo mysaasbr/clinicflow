@@ -12,28 +12,38 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     }
 
     const { query } = parse(req.url || '', true);
-    const webhookSecret = query.webhookSecret;
+    // Support secret from query (for easier setup) or standard header
+    const webhookSecret = query.webhookSecret || req.headers['x-webhook-secret'] || req.headers['x-abacatepay-secret'];
 
-    const EXPECTED_SECRET = process.env.ABACATEPAY_WEBHOOK_SECRET || 'abacate_secret_2026_clinic';
+    const EXPECTED_SECRET = process.env.ABACATEPAY_WEBHOOK_SECRET;
 
-    // 1. Verify Secret from Query
-    if (webhookSecret !== EXPECTED_SECRET) {
-        console.warn('Unauthorized AbacatePay webhook attempt');
+    console.log(`[Webhook] Incoming request from AbacatePay. Secret provided: ${webhookSecret ? 'Yes' : 'No'}`);
+
+    // If no secret is configured in env, we warn but allow in local dev if using hardcoded one
+    if (!EXPECTED_SECRET && process.env.NODE_ENV === 'production') {
+        console.error('ABACATEPAY_WEBHOOK_SECRET is not configured in environment variables');
+        res.statusCode = 500;
+        res.end(JSON.stringify({ error: 'Webhook secret not configured' }));
+        return;
+    }
+
+    if (EXPECTED_SECRET && webhookSecret !== EXPECTED_SECRET) {
+        console.warn(`[Webhook] Unauthorized attempt. Received: ${webhookSecret}, Expected: ${EXPECTED_SECRET}`);
         res.statusCode = 401;
         res.end(JSON.stringify({ error: 'Unauthorized' }));
         return;
     }
 
     const buffers = [];
-    for await (const chunk of req) {
-        buffers.push(chunk);
-    }
+    for await (const chunk of req) buffers.push(chunk);
     const bodyString = Buffer.concat(buffers).toString();
 
     let body;
     try {
         body = JSON.parse(bodyString);
+        console.log('[Webhook] Payload received:', JSON.stringify(body, null, 2));
     } catch (e) {
+        console.error('[Webhook] Failed to parse JSON body');
         res.statusCode = 400;
         res.end(JSON.stringify({ error: 'Invalid JSON' }));
         return;

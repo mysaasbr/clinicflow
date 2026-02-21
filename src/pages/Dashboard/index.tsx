@@ -7,7 +7,8 @@ import {
     CalendarDays, ChevronRight, MessageCircle, Bell,
     ArrowUpRight, Sparkles, Zap, ArrowRight, Target,
     Lock, Play, ExternalLink, Download, Layout,
-    Info, Star, HelpCircle, Trophy, Rocket
+    Info, Star, HelpCircle, Trophy, Rocket,
+    CreditCard, Coins, BadgeCheck
 } from 'lucide-react';
 
 // ─── Componentes Auxiliares ──────────────────────────────────
@@ -76,6 +77,104 @@ const StatusPipeline: React.FC<{ title: string; steps: any[]; accentColor: strin
     );
 };
 
+const LicenseWidget: React.FC<{ status: string; clinicName: string }> = ({ status, clinicName }) => {
+    const isPending = status === 'pending_payment';
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`
+                relative overflow-hidden rounded-[2.5rem] p-8 md:p-10 border-2 transition-all duration-500
+                ${isPending
+                    ? 'bg-white border-slate-100 shadow-xl shadow-slate-200/50 hover:border-indigo-600'
+                    : 'bg-slate-900 border-slate-900 shadow-2xl shadow-indigo-200/40 text-white'}
+            `}
+        >
+            <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 md:gap-10">
+                {/* ── Dynamic Illustration ── */}
+                <div className="relative shrink-0">
+                    {isPending ? (
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.1, 1],
+                                    rotate: [0, 5, -5, 0]
+                                }}
+                                transition={{ duration: 4, repeat: Infinity }}
+                                className="w-20 h-20 rounded-[1.8rem] bg-indigo-50 flex items-center justify-center text-indigo-600 shadow-inner"
+                            >
+                                <CreditCard className="w-10 h-10" />
+                            </motion.div>
+                            <motion.div
+                                animate={{ y: [-10, 10, -10], opacity: [0, 1, 0] }}
+                                transition={{ duration: 3, repeat: Infinity, delay: 1 }}
+                                className="absolute -top-2 -right-2 text-amber-400"
+                            >
+                                <Coins className="w-6 h-6" />
+                            </motion.div>
+                        </div>
+                    ) : (
+                        <div className="relative w-24 h-24 flex items-center justify-center">
+                            <motion.div
+                                animate={{
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, 360]
+                                }}
+                                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                                className="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl"
+                            />
+                            <div className="w-20 h-20 rounded-[1.8rem] bg-indigo-600 flex items-center justify-center text-white shadow-2xl shadow-indigo-500/40 relative z-10">
+                                <BadgeCheck className="w-11 h-11" />
+                            </div>
+                            <Sparkles className="absolute -top-1 -right-1 w-6 h-6 text-amber-300 animate-pulse" />
+                        </div>
+                    )}
+                </div>
+
+                {/* ── Copy Content ── */}
+                <div className="space-y-3 text-center md:text-left flex-1">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border">
+                        {isPending ? (
+                            <span className="text-indigo-600 border-indigo-100 bg-indigo-50/50">Licença Pendente</span>
+                        ) : (
+                            <span className="text-emerald-400 border-emerald-500/20 bg-emerald-500/10">Plano PRO Ativo</span>
+                        )}
+                    </div>
+
+                    <h2 className={`text-2xl md:text-3xl font-black tracking-tighter leading-tight ${isPending ? 'text-slate-900' : 'text-white'}`}>
+                        {isPending
+                            ? "Ative seu Estúdio Profissional"
+                            : `A ${clinicName} agora é ELITE.`}
+                    </h2>
+
+                    <p className={`text-sm md:text-base font-medium leading-relaxed max-w-lg ${isPending ? 'text-slate-500' : 'text-slate-400'}`}>
+                        {isPending
+                            ? "Para começarmos a produzir seu site e conteúdo, precisamos confirmar seu pagamento! É bem rápido, seguro e barato, basta clicar aqui:"
+                            : "Parabéns! Sua clínica está em um novo nível de excelência digital. Conte conosco para escalar e dominar o seu mercado."}
+                    </p>
+                </div>
+
+                {/* ── Action ── */}
+                {isPending && (
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => window.location.href = 'https://app.abacatepay.com/pay/bill_0HqSjYuuU5fEAjPKLrJQMBbL'}
+                        className="bg-slate-900 text-white px-8 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:bg-indigo-600 transition-colors flex items-center gap-3 shrink-0"
+                    >
+                        Quero ser PRO <Zap className="w-4 h-4 fill-white" />
+                    </motion.button>
+                )}
+            </div>
+
+            {!isPending && (
+                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none" />
+            )}
+        </motion.div>
+    );
+};
+
 // ─── Dashboard Principal ─────────────────────────────────────
 
 export const Dashboard: React.FC = () => {
@@ -83,6 +182,7 @@ export const Dashboard: React.FC = () => {
     const [data, setData] = React.useState<any>(null);
     const [loading, setLoading] = React.useState(true);
     const [isCreatingSession, setIsCreatingSession] = React.useState(false);
+    const [showSuccessModal, setShowSuccessModal] = React.useState(false);
 
     React.useEffect(() => {
         const fetchDashboard = async () => {
@@ -99,6 +199,15 @@ export const Dashboard: React.FC = () => {
                 setLoading(false);
             }
         };
+
+        // Check for success=true in URL
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('success') === 'true') {
+            setShowSuccessModal(true);
+            // Cleanup URL without refresh
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+
         fetchDashboard();
     }, []);
 
@@ -281,65 +390,11 @@ export const Dashboard: React.FC = () => {
                     </motion.div>
                 </header>
 
-                {/* ── Payment Warning ────────────────────────────── */}
-                {data?.project?.status === 'pending_payment' && (
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="bg-slate-900 border-2 border-slate-900 rounded-[3rem] p-10 md:p-14 flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden shadow-2xl shadow-indigo-200/50"
-                    >
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32" />
-
-                        <div className="flex items-center gap-10 relative z-10">
-                            <div className="w-24 h-24 rounded-[2rem] bg-indigo-600 flex items-center justify-center text-white shadow-2xl shadow-indigo-500/40 shrink-0 md:-rotate-6">
-                                <Lock className="w-10 h-10" />
-                            </div>
-                            <div className="space-y-3">
-                                <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-[10px] font-black uppercase tracking-widest">
-                                    Acesso Limitado
-                                </div>
-                                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter uppercase italic">Ative sua Licença Pro.</h2>
-                                <p className="text-slate-400 font-medium max-w-xl text-lg leading-relaxed">
-                                    Libere seu domínio personalizado, download de artes em 4K e SEO avançado agora mesmo.
-                                </p>
-                            </div>
-                        </div>
-
-                        <button
-                            disabled={isCreatingSession}
-                            onClick={async () => {
-                                setIsCreatingSession(true);
-
-                                try {
-                                    const res = await fetch('/api/payments/create-session', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            email: data?.clinic?.email,
-                                            name: data?.clinic?.name,
-                                            projectId: data?.project?.id
-                                        })
-                                    });
-                                    const result = await res.json();
-                                    if (result.url) {
-                                        window.location.href = result.url;
-                                    } else {
-                                        alert('Erro ao redirecionar para o pagamento.');
-                                    }
-                                } catch (e) {
-                                    console.error(e);
-                                    alert('Erro ao processar pedido.');
-                                } finally {
-                                    setIsCreatingSession(false);
-                                }
-                            }}
-                            id="pay-btn"
-                            className="relative z-10 bg-white text-slate-950 px-10 py-5 rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-xl flex items-center gap-3 shrink-0 disabled:opacity-50"
-                        >
-                            {isCreatingSession ? 'Processando...' : 'Liberar Agora'} <Zap className="w-4 h-4 fill-slate-950" />
-                        </button>
-                    </motion.div>
-                )}
+                {/* ── License Widget ────────────────────────────── */}
+                <LicenseWidget
+                    status={data?.project?.status || 'pending_payment'}
+                    clinicName={data?.clinic?.name || 'Sua Clínica'}
+                />
 
                 {/* ── Project Preview ────────────────────────────── */}
                 {(data?.project?.status === 'finished' || data?.project?.status === 'published') && (
@@ -508,6 +563,53 @@ export const Dashboard: React.FC = () => {
                 </div>
 
             </div>
+
+            {/* ── Success Celebration Modal ─────────────────────── */}
+            <AnimatePresence>
+                {showSuccessModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setShowSuccessModal(false)}
+                            className="absolute inset-0 bg-slate-900/60 backdrop-blur-md"
+                        />
+                        <motion.div
+                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                            className="bg-white rounded-[3rem] p-12 max-w-lg w-full relative z-10 shadow-2xl border-2 border-indigo-100 text-center overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-2 bg-indigo-500" />
+
+                            {/* Decorative Sparkles */}
+                            <div className="absolute top-10 left-10 text-indigo-200"><Sparkles className="w-8 h-8 rotate-12" /></div>
+                            <div className="absolute bottom-10 right-10 text-indigo-200"><Sparkles className="w-10 h-10 -rotate-12" /></div>
+
+                            <div className="w-24 h-24 bg-indigo-50 rounded-[2rem] flex items-center justify-center text-indigo-600 mx-auto mb-8 shadow-inner">
+                                <Trophy className="w-12 h-12" />
+                            </div>
+
+                            <h2 className="text-4xl font-black text-slate-900 tracking-tighter leading-tight mb-4">
+                                Pagamento <br />
+                                <span className="text-indigo-600">Confirmado!</span>
+                            </h2>
+
+                            <p className="text-slate-500 font-medium text-lg leading-relaxed mb-10">
+                                Parabéns! Sua licença Pro foi ativada com sucesso. Agora você tem acesso total ao seu estúdio.
+                            </p>
+
+                            <button
+                                onClick={() => setShowSuccessModal(false)}
+                                className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-xs tracking-[0.2em] hover:bg-indigo-600 transition-all shadow-xl"
+                            >
+                                Vamos começar
+                            </button>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </DashboardLayout>
     );
 };
