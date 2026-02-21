@@ -37,11 +37,15 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
             token: 'fake-jwt-token-' + user.id
         }));
 
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        console.error('Login Error:', error);
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Erro interno do servidor' }));
+        res.end(JSON.stringify({
+            error: 'Erro interno do servidor',
+            details: error.message,
+            db_connected: !!process.env.DATABASE_URL
+        }));
     }
 }
 

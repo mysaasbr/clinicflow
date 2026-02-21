@@ -50,11 +50,16 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
             token: 'fake-jwt-token-' + newUser.id
         }));
 
-    } catch (error) {
-        console.error(error);
+    } catch (error: any) {
+        console.error('Registration Error:', error);
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Erro interno do servidor' }));
+        res.end(JSON.stringify({
+            error: 'Erro interno do servidor',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
+            db_connected: !!process.env.DATABASE_URL
+        }));
     }
 }
 
