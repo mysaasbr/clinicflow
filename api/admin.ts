@@ -1,34 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
-// Admin Handlers
-import adminAddPayment from './_handlers/admin/add-payment';
-import adminChangesList from './_handlers/admin/changes/list';
-import adminChangesUpdateStatus from './_handlers/admin/changes/update-status';
-import adminClientDetails from './_handlers/admin/client-details';
-import adminClients from './_handlers/admin/clients';
-import adminCreateManualClient from './_handlers/admin/create-manual-client';
-import adminGetSettings from './_handlers/admin/get-settings';
-import adminLiberateAccess from './_handlers/admin/liberate-access';
-import adminStats from './_handlers/admin/stats';
-import adminSubscriptions from './_handlers/admin/subscriptions';
-import adminUpdateClientFee from './_handlers/admin/update-client-fee';
-import dashboardOverview from './_handlers/dashboard/overview';
-
-const handlers: Record<string, any> = {
-    'admin/add-payment': adminAddPayment,
-    'admin/changes/list': adminChangesList,
-    'admin/changes/update-status': adminChangesUpdateStatus,
-    'admin/client-details': adminClientDetails,
-    'admin/clients': adminClients,
-    'admin/create-manual-client': adminCreateManualClient,
-    'admin/get-settings': adminGetSettings,
-    'admin/liberate-access': adminLiberateAccess,
-    'admin/stats': adminStats,
-    'admin/subscriptions': adminSubscriptions,
-    'admin/update-client-fee': adminUpdateClientFee,
-    'dashboard/overview': dashboardOverview,
-};
-
+/**
+ * LAZY-LOAD ROUTER - ADMIN
+ */
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
         const host = req.headers.host || 'localhost';
@@ -45,23 +19,62 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         }
 
         const handlerPath = parts.slice(1).join('/');
-        const exportedMember = handlers[handlerPath];
+        let handlerModule: any = null;
 
-        if (exportedMember) {
-            const handlerFunc = exportedMember.default || exportedMember;
-
-            if (typeof handlerFunc !== 'function') {
-                throw new Error(`Handler for ${handlerPath} is not a function`);
-            }
-
-            return await handlerFunc(req, res);
-        } else {
-            console.warn(`[Admin Router] Handler not found for ${pathname}`);
-            res.statusCode = 404;
-            res.end(JSON.stringify({ error: `Handler not found for path: ${handlerPath}` }));
+        switch (handlerPath) {
+            case 'admin/add-payment':
+                handlerModule = await import('./_handlers/admin/add-payment');
+                break;
+            case 'admin/changes/list':
+                handlerModule = await import('./_handlers/admin/changes/list');
+                break;
+            case 'admin/changes/update-status':
+                handlerModule = await import('./_handlers/admin/changes/update-status');
+                break;
+            case 'admin/client-details':
+                handlerModule = await import('./_handlers/admin/client-details');
+                break;
+            case 'admin/clients':
+                handlerModule = await import('./_handlers/admin/clients');
+                break;
+            case 'admin/create-manual-client':
+                handlerModule = await import('./_handlers/admin/create-manual-client');
+                break;
+            case 'admin/get-settings':
+                handlerModule = await import('./_handlers/admin/get-settings');
+                break;
+            case 'admin/liberate-access':
+                handlerModule = await import('./_handlers/admin/liberate-access');
+                break;
+            case 'admin/stats':
+                handlerModule = await import('./_handlers/admin/stats');
+                break;
+            case 'admin/subscriptions':
+                handlerModule = await import('./_handlers/admin/subscriptions');
+                break;
+            case 'admin/update-client-fee':
+                handlerModule = await import('./_handlers/admin/update-client-fee');
+                break;
+            case 'dashboard/overview':
+                handlerModule = await import('./_handlers/dashboard/overview');
+                break;
+            default:
+                console.warn(`[Admin Router] Path not mapped: ${handlerPath}`);
+                res.statusCode = 404;
+                res.end(JSON.stringify({ error: `Path not found: ${handlerPath}` }));
+                return;
         }
+
+        if (handlerModule) {
+            const func = handlerModule.default || handlerModule;
+            if (typeof func === 'function') {
+                return await func(req, res);
+            }
+            throw new Error(`Handler exported from ${handlerPath} is not a function`);
+        }
+
     } catch (error: any) {
-        console.error(`[Admin Router] Fatal Error:`, error);
+        console.error(`[Admin Router] Runtime Error:`, error);
         res.statusCode = 500;
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({
