@@ -1,8 +1,56 @@
 {
     "rewrites": [
         {
-            "source": "/api/(.*)",
-            "destination": "/api/$1"
+            "source": "/api/admin/(.*)",
+            "destination": "/api/admin"
+        },
+        {
+            "source": "/api/dashboard/(.*)",
+            "destination": "/api/admin"
+        },
+        {
+            "source": "/api/projects/(.*)",
+            "destination": "/api/app"
+        },
+        {
+            "source": "/api/posts/(.*)",
+            "destination": "/api/app"
+        },
+        {
+            "source": "/api/settings/(.*)",
+            "destination": "/api/app"
+        },
+        {
+            "source": "/api/onboarding/(.*)",
+            "destination": "/api/app"
+        },
+        {
+            "source": "/api/changes/(.*)",
+            "destination": "/api/app"
+        },
+        {
+            "source": "/api/auth/(.*)",
+            "destination": "/api/public"
+        },
+        {
+            "source": "/api/ai/(.*)",
+            "destination": "/api/public"
+        },
+        {
+            "source": "/api/crm/(.*)",
+            "destination": "/api/public"
+        },
+        {
+            "source": "/api/payments/(.*)",
+            "destination": "/api/public"
+        },
+        {
+            "source": "/api/quiz/(.*)",
+            "destination": "/api/public"
+        },
+        {
+            "source": "/api/webhooks/(.*)",
+            "destination": "/api/public"
         },
         {
             "source": "/(.*)",
