@@ -160,7 +160,7 @@ const LicenseWidget: React.FC<{ status: string; clinicName: string }> = ({ statu
                     <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => window.location.href = 'https://app.abacatepay.com/pay/bill_0HqSjYuuU5fEAjPKLrJQMBbL'}
+                        onClick={() => window.location.href = 'https://app.abacatepay.com/pay/bill_HKYedndkgzdXECkwmk55LF5e'}
                         className="bg-slate-900 text-white px-8 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl hover:bg-indigo-600 transition-colors flex items-center gap-3 shrink-0"
                     >
                         Quero ser PRO <Zap className="w-4 h-4 fill-white" />
