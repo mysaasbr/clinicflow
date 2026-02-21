@@ -1,10 +1,28 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
-/**
- * LAZY-LOAD ROUTER
- * This router uses runtime dynamic imports to ensure the Vercel function can start 
- * even if some handlers have dependency issues.
- */
+// Static imports to force Vercel to bundle these files
+import aiImproveText from './_handlers/ai/improve-text';
+import authLogin from './_handlers/auth/login';
+import authRegister from './_handlers/auth/register';
+import crmCollect from './_handlers/crm/collect';
+import crmLeads from './_handlers/crm/leads';
+import crmSeed from './_handlers/crm/seed';
+import paymentsCreateSession from './_handlers/payments/create-session';
+import quizSubmit from './_handlers/quiz/submit';
+import webhooksAbacatepay from './_handlers/webhooks/abacatepay';
+
+const handlers: Record<string, any> = {
+    'ai/improve-text': aiImproveText,
+    'auth/login': authLogin,
+    'auth/register': authRegister,
+    'crm/collect': crmCollect,
+    'crm/leads': crmLeads,
+    'crm/seed': crmSeed,
+    'payments/create-session': paymentsCreateSession,
+    'quiz/submit': quizSubmit,
+    'webhooks/abacatepay': webhooksAbacatepay,
+};
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
         const host = req.headers.host || 'localhost';
@@ -21,55 +39,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         }
 
         const handlerPath = parts.slice(1).join('/');
-        let handlerModule: any = null;
+        const exportedMember = handlers[handlerPath];
 
-        // Dynamic mapping to ensure Vercel bundles the files but executes them only on demand
-        switch (handlerPath) {
-            case 'auth/login':
-                handlerModule = await import('./_handlers/auth/login');
-                break;
-            case 'auth/register':
-                handlerModule = await import('./_handlers/auth/register');
-                break;
-            case 'ai/improve-text':
-                handlerModule = await import('./_handlers/ai/improve-text');
-                break;
-            case 'crm/collect':
-                handlerModule = await import('./_handlers/crm/collect');
-                break;
-            case 'crm/leads':
-                handlerModule = await import('./_handlers/crm/leads');
-                break;
-            case 'crm/seed':
-                handlerModule = await import('./_handlers/crm/seed');
-                break;
-            case 'payments/create-session':
-                handlerModule = await import('./_handlers/payments/create-session');
-                break;
-            case 'quiz/submit':
-                handlerModule = await import('./_handlers/quiz/submit');
-                break;
-            case 'webhooks/abacatepay':
-                handlerModule = await import('./_handlers/webhooks/abacatepay');
-                break;
-            case 'hello':
-                res.end(JSON.stringify({ hello: 'world', mode: 'lazy' }));
-                return;
-            default:
-                console.warn(`[Public Router] Path not mapped: ${handlerPath}`);
-                res.statusCode = 404;
-                res.end(JSON.stringify({ error: `Path not found: ${handlerPath}` }));
-                return;
-        }
-
-        if (handlerModule) {
-            const func = handlerModule.default || handlerModule;
+        if (exportedMember) {
+            const func = exportedMember.default || exportedMember;
             if (typeof func === 'function') {
                 return await func(req, res);
             }
-            throw new Error(`Handler exported from ${handlerPath} is not a function`);
+            throw new Error(`Handler for ${handlerPath} is not a function`);
+        } else {
+            console.warn(`[Public Router] Path not found: ${handlerPath}`);
+            res.statusCode = 404;
+            res.end(JSON.stringify({ error: `Path not found: ${handlerPath}` }));
         }
-
     } catch (error: any) {
         console.error(`[Public Router] Runtime Error:`, error);
         res.statusCode = 500;
@@ -77,7 +59,6 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         res.end(JSON.stringify({
             error: 'Internal Server Error',
             message: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
             db_ready: !!process.env.DATABASE_URL
         }));
     }

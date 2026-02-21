@@ -1,8 +1,38 @@
 import type { IncomingMessage, ServerResponse } from 'http';
 
-/**
- * LAZY-LOAD ROUTER - APP
- */
+// App Handlers (Static imports for Vercel bundling)
+import changesCheckStatus from './_handlers/changes/check-status';
+import changesCreate from './_handlers/changes/create';
+import onboardingComplete from './_handlers/onboarding/complete-onboarding';
+import postsCreate from './_handlers/posts/create';
+import postsDelete from './_handlers/posts/delete';
+import postsList from './_handlers/posts/list';
+import postsMonths from './_handlers/posts/months';
+import postsUpdate from './_handlers/posts/update';
+import projectsCreate from './_handlers/projects/create';
+import projectsDelete from './_handlers/projects/delete';
+import projectsList from './_handlers/projects/list';
+import projectsUpdateStatus from './_handlers/projects/update-status';
+import projectsUpdate from './_handlers/projects/update';
+import settingsUpdateClinic from './_handlers/settings/update-clinic';
+
+const handlers: Record<string, any> = {
+    'changes/check-status': changesCheckStatus,
+    'changes/create': changesCreate,
+    'onboarding/complete-onboarding': onboardingComplete,
+    'posts/create': postsCreate,
+    'posts/delete': postsDelete,
+    'posts/list': postsList,
+    'posts/months': postsMonths,
+    'posts/update': postsUpdate,
+    'projects/create': projectsCreate,
+    'projects/delete': projectsDelete,
+    'projects/list': projectsList,
+    'projects/update-status': projectsUpdateStatus,
+    'projects/update': projectsUpdate,
+    'settings/update-clinic': settingsUpdateClinic,
+};
+
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
     try {
         const host = req.headers.host || 'localhost';
@@ -19,66 +49,19 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
         }
 
         const handlerPath = parts.slice(1).join('/');
-        let handlerModule: any = null;
+        const exportedMember = handlers[handlerPath];
 
-        switch (handlerPath) {
-            case 'changes/check-status':
-                handlerModule = await import('./_handlers/changes/check-status');
-                break;
-            case 'changes/create':
-                handlerModule = await import('./_handlers/changes/create');
-                break;
-            case 'onboarding/complete-onboarding':
-                handlerModule = await import('./_handlers/onboarding/complete-onboarding');
-                break;
-            case 'posts/create':
-                handlerModule = await import('./_handlers/posts/create');
-                break;
-            case 'posts/delete':
-                handlerModule = await import('./_handlers/posts/delete');
-                break;
-            case 'posts/list':
-                handlerModule = await import('./_handlers/posts/list');
-                break;
-            case 'posts/months':
-                handlerModule = await import('./_handlers/posts/months');
-                break;
-            case 'posts/update':
-                handlerModule = await import('./_handlers/posts/update');
-                break;
-            case 'projects/create':
-                handlerModule = await import('./_handlers/projects/create');
-                break;
-            case 'projects/delete':
-                handlerModule = await import('./_handlers/projects/delete');
-                break;
-            case 'projects/list':
-                handlerModule = await import('./_handlers/projects/list');
-                break;
-            case 'projects/update-status':
-                handlerModule = await import('./_handlers/projects/update-status');
-                break;
-            case 'projects/update':
-                handlerModule = await import('./_handlers/projects/update');
-                break;
-            case 'settings/update-clinic':
-                handlerModule = await import('./_handlers/settings/update-clinic');
-                break;
-            default:
-                console.warn(`[App Router] Path not mapped: ${handlerPath}`);
-                res.statusCode = 404;
-                res.end(JSON.stringify({ error: `Path not found: ${handlerPath}` }));
-                return;
-        }
-
-        if (handlerModule) {
-            const func = handlerModule.default || handlerModule;
+        if (exportedMember) {
+            const func = exportedMember.default || exportedMember;
             if (typeof func === 'function') {
                 return await func(req, res);
             }
-            throw new Error(`Handler exported from ${handlerPath} is not a function`);
+            throw new Error(`Handler for ${handlerPath} is not a function`);
+        } else {
+            console.warn(`[App Router] Path not found: ${handlerPath}`);
+            res.statusCode = 404;
+            res.end(JSON.stringify({ error: `Path not found: ${handlerPath}` }));
         }
-
     } catch (error: any) {
         console.error(`[App Router] Runtime Error:`, error);
         res.statusCode = 500;
